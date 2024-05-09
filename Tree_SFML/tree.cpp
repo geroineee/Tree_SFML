@@ -1,5 +1,7 @@
 #include "tree.h"
 
+
+
 Tree::Tree() {}
 
 Tree::Tree(double value)
@@ -8,6 +10,20 @@ Tree::Tree(double value)
     right = nullptr;
     parent = nullptr;
     data = value;
+}
+
+Tree::Tree(const std::vector<double>& values)
+{
+    if (values.empty()) { return; }
+
+    this->left = nullptr;
+    this->right = nullptr;
+    this->parent = nullptr;
+    this->data = values[0];
+
+    for (size_t i = 1; i < values.size(); i++) {
+        this->insert(values[i]);
+    }
 }
 
 void Tree::insert(double value)
@@ -32,27 +48,16 @@ void Tree::insert(double value)
     }
 }
 
-Tree* Tree::createTree(const std::vector<double>& values)
-{
-    if (values.empty()) {
-        return nullptr;
-    }
 
-    Tree* root = new Tree(values[0]);
-
-    for (size_t i = 1; i < values.size(); i++) {
-        root->insert(values[i]);
-    }
-
-    return root;
-}
 
 void drawTree(sf::RenderWindow& window, Tree* node, int x, int y, int level)
 {
-    if (node == nullptr)
-        return;
+    if (node == nullptr) return;
 
-    int radius = 30; // Размер окружности узла
+    int radius = node->getNodeRadius();
+    int shift_x = node->getShiftX();
+    int shift_y = node->getShiftY();
+    int font_size = node->getFontSize();
 
     // Отображение узла как окружности
     sf::CircleShape circle(radius);
@@ -72,12 +77,14 @@ void drawTree(sf::RenderWindow& window, Tree* node, int x, int y, int level)
     text.setPosition(x - 30, y - 20);
     window.draw(text);
 
-    // Рекурсивный вызов для левого и правого потомка
-    if (node->left != nullptr) {
+    // Рекурсивные вызовы для левого и правого потомка узла
+    if (node->left != nullptr)
+    {
         drawTree(window, node->left, x - shift_x * level, y + shift_y, level - 1);
     }
 
-    if (node->right != nullptr) {
+    if (node->right != nullptr)
+    {
         drawTree(window, node->right, x + shift_x * level, y + shift_y, level - 1);
     }
 }
