@@ -1,5 +1,8 @@
 #include "tree.h"
 #include <cmath>
+#include <stdlib.h>
+#include <iomanip>
+#include <sstream>
 
 
 Tree::Tree() {}
@@ -27,6 +30,41 @@ Tree::Tree(const std::vector<double>& values)
     }
 }
 
+int Tree::find_height()
+{
+    int height_left = 0, height_right = 0;
+    if (this == nullptr)
+        return 0;
+    if (this->left != nullptr)
+        height_left = this->left->find_height();
+    if (this->right != nullptr)
+        height_right = this->right->find_height();
+    return std::max(height_right, height_left)+1;
+}
+
+int Tree::find_left_lenght(int level)
+{
+    int lenght_left = 0, lenght_right = 0;
+    if (this == nullptr)
+        return 0;
+    if (this->left != nullptr)
+    {
+        lenght_left += shift_x * level * 1.5;
+        this->left->find_left_lenght(level - 1);
+    }
+    if (this->right != nullptr)
+    {
+        lenght_left -= shift_x * level * 1.5;
+        this->right->find_left_lenght(level - 1);
+    }
+    return lenght_left;
+}
+
+int Tree::find_right_lenght()
+{
+    return 0;
+}
+
 void Tree::insert(double value)
 {
     if (value < data) 
@@ -52,6 +90,36 @@ void Tree::insert(double value)
         {
             right->insert(value);
         }
+    }
+}
+
+void Tree::draw(const std::wstring title)
+{
+    int height = this->find_height();
+    int height_left = this->left->find_height();
+    int height_right = this->right->find_height();
+    int test = this->find_left_lenght(height);
+
+    sf::RenderWindow window(sf::VideoMode(800, 600), title);
+    window.setActive(true);
+    window.setVerticalSyncEnabled(true);
+
+    while (window.isOpen())
+    {
+        sf::Event event;
+
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+            }
+        }
+
+        window.clear(sf::Color::White);
+        drawTree(window, this, 400, 50, height); // отрисовка дерева
+
+        window.display();
     }
 }
 
@@ -94,11 +162,16 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level)
     // Отображение значения узла внутри окружности
     sf::Font font;
     font.loadFromFile("gta.ttf"); // шрифт
-    sf::Text text(std::to_string(node->getData()), font);
+
+    // Форматирование значения узла
+    std::ostringstream buf;
+    buf << std::fixed << std::setprecision(1) << node->getData();
+
+    sf::Text text(buf.str(), font);
     text.setCharacterSize(font_size);
     text.setOutlineThickness(1);
     text.setOutlineColor(sf::Color::Black);
-    text.setPosition(x - 30, y - 20);
+    text.setPosition(x - (font_size/2.5 * buf.str().size()/2) + 1 + (buf.str().size()), y - (font_size * 0.75) + 1);
 
     if (node->getParent() != nullptr)
     {
@@ -111,11 +184,11 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level)
     // Рекурсивные вызовы для левого и правого потомка узла
     if (node->getLeft() != nullptr)
     {
-        drawTree(window, node->getLeft(), x - shift_x * level, y + shift_y, level - 1);
+        drawTree(window, node->getLeft(), x - shift_x * level * 1.5, y + shift_y, level - 1);
     }
 
     if (node->getRight() != nullptr)
     {
-        drawTree(window, node->getRight(), x + shift_x * level, y + shift_y, level - 1);
+        drawTree(window, node->getRight(), x + shift_x * level * 1.5, y + shift_y, level - 1);
     }
 }

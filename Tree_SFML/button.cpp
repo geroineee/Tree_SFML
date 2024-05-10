@@ -9,13 +9,15 @@ RectButton::RectButton(const sf::Vector2f size)
 RectButton::RectButton(const sf::Vector2f size, const sf::Vector2f position)
 {
 	this->button.setSize(size);
+	this->button.setOutlineThickness(1);
+	this->button.setOutlineColor(sf::Color::Black);
 	this->button.setPosition(position);
 	this->buttonPos = position;
 	this->buttonRect = this->button.getLocalBounds();
 }
 RectButton::~RectButton() {}
 
-//статус
+//статус кнопки
 void RectButton::getButtonStatus(sf::RenderWindow& window, sf::Event& event)
 {
 	this->mousePosWindow = sf::Mouse::getPosition(window);//позиция мыши в окне
@@ -38,15 +40,17 @@ void RectButton::getButtonStatus(sf::RenderWindow& window, sf::Event& event)
 
 		if (isHover) // при наведении курсора
 		{
-			button.setFillColor(defaultPressed); // изменение цвета
+			button.setFillColor(defaultPressed); 
 		}
-		else button.setFillColor(defaultHovered); // обычный цвет
+		else button.setFillColor(defaultHovered); 
 		
-		if (isPressed) {//кнопка нажата
-			button.setFillColor(defaultPressed);//возвращаю истинный цвет
+		if (isPressed) //кнопка нажата
+		{
+			button.setFillColor(defaultPressed); 
 		}
 	}
-	else {//обычный цвет
+	else //обычный цвет 
+	{
 		button.setFillColor(defaultPressed);
 	}
 }
@@ -59,9 +63,15 @@ void RectButton::setButtonLable(std::wstring label, const sf::Color& color, floa
 	this->buttonLabel.setString(label); // надпись
 	this->buttonLabel.setCharacterSize(charSize);//размер символов
 	this->buttonLabel.setFillColor(color);//устанавливаю цвет
+	this->buttonLabel.setOutlineThickness(1);
 	this->label = label;//присваиваю надпись
 	this->labelRect = this->buttonLabel.getLocalBounds();
-	this->buttonLabel.setOrigin(this->labelRect.width / 2.0f, this->labelRect.height / 2.0f);//ставлю координаты
+	this->buttonLabel.setOrigin(this->labelRect.width / 2.0f, this->labelRect.height / 1.2f);//ставлю координаты
 	this->buttonLabel.setPosition(this->buttonPos.x + (this->buttonRect.width / 2.0f),//ставлю координаты
 	this->buttonPos.y + (this->buttonRect.height / 4.0f) + 7);
+}
+
+void Button::setButtonFont(sf::Font& font)
+{
+	buttonLabel.setFont(font);
 }

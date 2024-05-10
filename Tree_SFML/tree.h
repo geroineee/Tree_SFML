@@ -1,5 +1,4 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
 #include <vector>
 using namespace sf;
@@ -9,9 +8,9 @@ class Tree
 {
 private:
     int font_size = 20; // размер шрифта надписи значения узла
-    float shift_x = 40; // смещение по x для следующего узла
-    float shift_y = 100; // смещение по y для следующего узла
-    int node_radius = 30; // размер окружности узла
+    float shift_x = 20; // смещение по x для следующего узла
+    float shift_y = 60; // смещение по y для следующего узла
+    int node_radius = 20; // размер окружности узла
     
     Tree* left;
     Tree* right;
@@ -49,8 +48,14 @@ public:
     Vector2f getPosition() { return this->position; }
     void setPosition(Vector2f position) { this->position = position; }
 
+    int find_height();
+    int find_left_lenght(int level);
+    int find_right_lenght();
+
     // вставка значения в дерево
     void insert(double value);
+
+    void draw(const std::wstring title);
 };
 
 
