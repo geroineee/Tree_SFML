@@ -2,7 +2,7 @@
 #include "button.h" 
 #include <iostream>
 
-#define TREE_SIZE 15
+#define TREE_SIZE 7
 
 std::vector<double> tree_rand(int size);
 

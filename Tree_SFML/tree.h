@@ -80,6 +80,9 @@ public:
     // обратный обход (LRN)
     void LRN(std::vector<double>* vect);
 
+    // нахождение количества узлов дерева
+    int getNodesCnt();
+
     // отрисовка дерева
     void draw(const std::wstring title, bool isHorosontal = false);
 };

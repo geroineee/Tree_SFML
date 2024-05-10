@@ -285,83 +285,107 @@ void Tree::showTraversals()
 {
     sf::Font font;
     font.loadFromFile("gta.ttf");
+    int font_size = 30;
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), L"Обходы дерева");
+    float window_width, window_height = 330;
+    int count_node = (getNodesCnt()+1) * 3;
+    if (count_node < 25)
+        window_width = font_size / 2.5 * 25;
+    else
+        window_width = font_size / 2.5 * count_node;
+    sf::RenderWindow window(sf::VideoMode(window_width + 100, window_height), L"Обходы дерева");
     window.setVerticalSyncEnabled(true);
+
+    RectButton button_back({ 150, 40 }, { window_width / 2 - 30, window_height - 70 });
+    button_back.setButtonFont(font);
+    button_back.setButtonLable(L"Назад", sf::Color::White, 30);
 
     while (window.isOpen())
     {
         sf::Event event;
 
+        button_back.getButtonStatus(window, event);
+
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
+            {
                 window.close();
-
-            window.clear(sf::Color::White);
-
-            int font_size = 30;
-            
-            std::vector <double> vect;
-            std::wstring text_to_show = L"";
-
-            // прямой обход (NLR)
-            text_to_show = L"";
-            this->NLR(&vect);
-            for (size_t i = 0; i < vect.size(); i++)
-            {
-                std::ostringstream buf;
-                buf << std::fixed << std::setprecision(1) << vect[i];
-                text_to_show = text_to_show + " " + buf.str();
             }
-
-            sf::Text text_NLR(L"Прямой обход (nlr):" + text_to_show, font);
-            text_NLR.setCharacterSize(font_size);
-            text_NLR.setPosition({0, 0});
-            text_NLR.setOutlineThickness(1);
-            text_NLR.setOutlineColor(Color::Black);
-            vect.clear();
-
-            // симметричный обход (LNR)
-            text_to_show = L"";
-            this->LNR(&vect);
-            for (size_t i = 0; i < vect.size(); i++)
+            if (event.type == sf::Event::MouseButtonPressed)
             {
-                std::ostringstream buf;
-                buf << std::fixed << std::setprecision(1) << vect[i];
-                text_to_show = text_to_show + " " + buf.str();
+                if (event.key.code == Mouse::Left)
+                {
+                    if (button_back.isPressed == true)
+                    {
+                        window.close();
+                    }
+                }
             }
-
-            sf::Text text_LNR(L"Симметричный обход (lnr):" + text_to_show, font);
-            text_LNR.setCharacterSize(font_size);
-            text_LNR.setPosition({ 0, 30});
-            text_LNR.setOutlineThickness(1);
-            text_LNR.setOutlineColor(Color::Black);
-            vect.clear();
-
-            // обратный проход (LRN)
-            text_to_show = L"";
-            this->LRN(&vect);
-            for (size_t i = 0; i < vect.size(); i++)
-            {
-                std::ostringstream buf;
-                buf << std::fixed << std::setprecision(1) << vect[i];
-                text_to_show = text_to_show + " " + buf.str();
-            }
-
-            sf::Text text_LRN(L"Обратный проход (lrn):" + text_to_show, font);
-            text_LRN.setCharacterSize(font_size);
-            text_LRN.setPosition({ 0, 60 });
-            text_LRN.setOutlineThickness(1);
-            text_LRN.setOutlineColor(Color::Black);
-            vect.clear();
-
-            // отрисовка виджетов
-            window.draw(text_NLR);
-            window.draw(text_LNR);
-            window.draw(text_LRN);
-            window.display();
         }
+        
+        std::vector <double> vect;
+        std::wstring text_to_show = L"";
+
+        // прямой обход (NLR)
+        text_to_show = L"";
+        this->NLR(&vect);
+        for (size_t i = 0; i < vect.size(); i++)
+        {
+            std::ostringstream buf;
+            buf << std::fixed << std::setprecision(1) << vect[i];
+            text_to_show = text_to_show + " " + buf.str();
+        }
+
+        sf::Text text_NLR(L"прямой обход (nlr):\n" + text_to_show, font);
+        text_NLR.setCharacterSize(font_size);
+        text_NLR.setPosition({50, 50});
+        text_NLR.setOutlineThickness(1);
+        text_NLR.setOutlineColor(Color::Black);
+        vect.clear();
+
+        // симметричный обход (LNR)
+        text_to_show = L"";
+        this->LNR(&vect);
+        for (size_t i = 0; i < vect.size(); i++)
+        {
+            std::ostringstream buf;
+            buf << std::fixed << std::setprecision(1) << vect[i];
+            text_to_show = text_to_show + " " + buf.str();
+        }
+
+        sf::Text text_LNR(L"Симметричный обход (lnr):\n" + text_to_show, font);
+        text_LNR.setCharacterSize(font_size);
+        text_LNR.setPosition({ 50, 110});
+        text_LNR.setOutlineThickness(1);
+        text_LNR.setOutlineColor(Color::Black);
+        vect.clear();
+
+        // обратный проход (LRN)
+        text_to_show = L"";
+        this->LRN(&vect);
+        for (size_t i = 0; i < vect.size(); i++)
+        {
+            std::ostringstream buf;
+            buf << std::fixed << std::setprecision(1) << vect[i];
+            text_to_show = text_to_show + " " + buf.str();
+        }
+
+        sf::Text text_LRN(L"Обратный проход (lrn):\n" + text_to_show, font);
+        text_LRN.setCharacterSize(font_size);
+        text_LRN.setPosition({ 50, 170 });
+        text_LRN.setOutlineThickness(1);
+        text_LRN.setOutlineColor(Color::Black);
+        vect.clear();
+
+        window.clear(sf::Color::White);
+
+        // отрисовка виджетов
+        button_back.draw(window);
+        window.draw(text_NLR);
+        window.draw(text_LNR);
+        window.draw(text_LRN);
+        window.display();
     }
 }
 
@@ -424,4 +448,25 @@ void Tree::LRN(std::vector<double>* vect)
         this->right->LRN(vect);
     }
     vect->push_back(this->data);
+}
+
+int Tree::getNodesCnt()
+{
+    int cnt = 0;
+
+    if (this == nullptr)
+    {
+        return 0;
+    }
+
+    if (this->left != nullptr)
+    {
+        cnt += 1 + this->left->getNodesCnt();
+    }
+
+    if (this->right != nullptr)
+    {
+        cnt += 1 + this->right->getNodesCnt();
+    }
+    return cnt;
 }
