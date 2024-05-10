@@ -1,9 +1,5 @@
 #include "tree.h"
 #include "button.h"
-#include <cmath>
-#include <stdlib.h>
-#include <iomanip>
-#include <sstream>
 
 
 Tree::Tree() {}
@@ -107,22 +103,31 @@ void Tree::insert(double value)
     }
 }
 
-void Tree::draw(const std::wstring title)
+void Tree::draw(const std::wstring title, bool isHorisontal)
 {
     int height = this->find_height();
     int lenght_left = this->find_left_lenght(height);
     int lenght_right = this->find_right_lenght(height);
-    float window_width = 100 + lenght_left + lenght_right;
-    float window_height = 150 + this->node_radius * 2 + shift_y * (height - 1);
+    float window_width, window_height;
+
+    if (!isHorisontal)
+    {
+        window_width = 100 + lenght_left + lenght_right;
+        window_height = 150 + this->node_radius * 2 + shift_y * (height - 1);
+    }
+    else
+    {
+        window_width = 100 + this->node_radius * 2 + shift_y * (height - 1);
+        window_height = 150 + lenght_left + lenght_right;
+    }
 
     sf::RenderWindow window(sf::VideoMode(window_width, window_height), title);
-    window.setActive(true);
     window.setVerticalSyncEnabled(true);
 
     sf::Font font;
     font.loadFromFile("gta.ttf");
 
-    RectButton button_back({150, 40}, {window_width/2 - 75, window_height - 70});
+    RectButton button_back({ 150, 40 }, { window_width / 2 - 75, window_height - 70 });
     button_back.setButtonFont(font);
     button_back.setButtonLable(L"Назад", sf::Color::White, 30);
 
@@ -152,30 +157,48 @@ void Tree::draw(const std::wstring title)
 
         window.clear(sf::Color::White);
         button_back.draw(window);
-        drawTree(window, this, 50+lenght_left, 50, height); // отрисовка дерева
+
+        // отрисовка дерева
+        if (!isHorisontal)
+            drawTree(window, this, 50 + lenght_left, 50, height, isHorisontal);
+        else
+            drawTree(window, this, 50, 50 + lenght_right, height, isHorisontal);
 
         window.display();
     }
 }
 
-void drawLine(sf::RenderWindow& window, int radius, Vector2f pos_parent, Vector2f pos_node)
+void drawLine(sf::RenderWindow& window, int radius, Vector2f pos_start, Vector2f pos_finish)
 {
-    float x1 = pos_parent.x, y1 = pos_parent.y+radius, x2 = pos_node.x, y2 = pos_node.y-radius;
-    RectangleShape rect({1, sqrt(pow(x1-x2, 2) + pow(y2-y1, 2))});
+    float x1 = pos_start.x, y1 = pos_start.y, x2 = pos_finish.x, y2 = pos_finish.y;
+    float delta_x = fabs(x1 - x2);
+    float delta_y = fabs(y1 - y2);
+
+    float lenght = sqrt(pow(x1 - x2, 2) + pow(y2 - y1, 2));
+    RectangleShape rect({ 1, lenght });
 
     rect.setFillColor(Color(0, 0, 0));
     rect.setPosition({ x1, y1 });
     float angle;
-    if (x1 < x2)
-        angle = -90 - 57.2958 * asin((y2 - y1) / (x1 - x2));
-    else
-        angle = 90 - 57.2958 * asin((y2 - y1) / (x1 - x2));
+
+    if (x2 < x1 && y2 > y1)
+    {
+        angle = 57.2958 * asin(delta_x / lenght);
+    }
+    if (x2 > x1 && y2 > y1)
+    {
+        angle = 270 + 57.2958 * asin(delta_y / lenght);
+    }
+    if (x2 > x1 && y2 < y1)
+    {
+        angle = 180 + 57.2958 * asin(delta_x / lenght);
+    }
     rect.setRotation(angle);
 
     window.draw(rect);
 }
 
-void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level)
+void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level, bool isHorisontal)
 {
     if (node == nullptr) return;
 
@@ -185,7 +208,7 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level)
     int font_size = node->getFontSize();
     Vector2f position(x - radius, y - radius);
 
-    node->setPosition({x, y});
+    node->setPosition({ x, y });
 
     // Отображение узла как окружности
     sf::CircleShape circle(radius);
@@ -206,24 +229,199 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level)
     text.setCharacterSize(font_size);
     text.setOutlineThickness(1);
     text.setOutlineColor(sf::Color::Black);
-    text.setPosition(x - (font_size/2.5 * buf.str().size()/2) + 1 + (buf.str().size()), y - (font_size * 0.75) + 1);
+    text.setPosition(x - (font_size / 2.5 * buf.str().size() / 2) + 1 + (buf.str().size()), y - (font_size * 0.75) + 1);
 
     if (node->getParent() != nullptr)
     {
-        drawLine(window, node->getNodeRadius(), node->getParent()->getPosition(), node->getPosition());
+        Vector2f pos_parent, pos_node;
+        pos_parent = node->getParent()->getPosition();
+        pos_node = node->getPosition();
+
+        if (!isHorisontal)
+        {
+            pos_parent.y += radius;
+            pos_node.y -= radius;
+        }
+        else
+        {
+            pos_parent.x += radius;
+            pos_node.x -= radius;
+        }
+        drawLine(window, node->getNodeRadius(), pos_parent, pos_node);
     }
     window.draw(circle);
     window.draw(text);
-    
+
 
     // Рекурсивные вызовы для левого и правого потомка узла
-    if (node->getLeft() != nullptr)
+    if (!isHorisontal)
     {
-        drawTree(window, node->getLeft(), x - shift_x * level * 1.5, y + shift_y, level - 1);
+        if (node->getLeft() != nullptr)
+        {
+            drawTree(window, node->getLeft(), x - shift_x * level * 1.5, y + shift_y, level - 1, isHorisontal);
+        }
+
+        if (node->getRight() != nullptr)
+        {
+            drawTree(window, node->getRight(), x + shift_x * level * 1.5, y + shift_y, level - 1, isHorisontal);
+        }
+    }
+    else
+    {
+        if (node->getLeft() != nullptr)
+        {
+            drawTree(window, node->getLeft(), x + shift_y, y + shift_x * level * 1.5, level - 1, isHorisontal);
+        }
+
+        if (node->getRight() != nullptr)
+        {
+            drawTree(window, node->getRight(), x + shift_y, y - shift_x * level * 1.5, level - 1, isHorisontal);
+        }
+    }
+}
+
+
+void Tree::showTraversals()
+{
+    sf::Font font;
+    font.loadFromFile("gta.ttf");
+
+    sf::RenderWindow window(sf::VideoMode(800, 600), L"Обходы дерева");
+    window.setVerticalSyncEnabled(true);
+
+    while (window.isOpen())
+    {
+        sf::Event event;
+
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            window.clear(sf::Color::White);
+
+            int font_size = 30;
+            
+            std::vector <double> vect;
+            std::wstring text_to_show = L"";
+
+            // прямой обход (NLR)
+            text_to_show = L"";
+            this->NLR(&vect);
+            for (size_t i = 0; i < vect.size(); i++)
+            {
+                std::ostringstream buf;
+                buf << std::fixed << std::setprecision(1) << vect[i];
+                text_to_show = text_to_show + " " + buf.str();
+            }
+
+            sf::Text text_NLR(L"Прямой обход (nlr):" + text_to_show, font);
+            text_NLR.setCharacterSize(font_size);
+            text_NLR.setPosition({0, 0});
+            text_NLR.setOutlineThickness(1);
+            text_NLR.setOutlineColor(Color::Black);
+            vect.clear();
+
+            // симметричный обход (LNR)
+            text_to_show = L"";
+            this->LNR(&vect);
+            for (size_t i = 0; i < vect.size(); i++)
+            {
+                std::ostringstream buf;
+                buf << std::fixed << std::setprecision(1) << vect[i];
+                text_to_show = text_to_show + " " + buf.str();
+            }
+
+            sf::Text text_LNR(L"Симметричный обход (lnr):" + text_to_show, font);
+            text_LNR.setCharacterSize(font_size);
+            text_LNR.setPosition({ 0, 30});
+            text_LNR.setOutlineThickness(1);
+            text_LNR.setOutlineColor(Color::Black);
+            vect.clear();
+
+            // обратный проход (LRN)
+            text_to_show = L"";
+            this->LRN(&vect);
+            for (size_t i = 0; i < vect.size(); i++)
+            {
+                std::ostringstream buf;
+                buf << std::fixed << std::setprecision(1) << vect[i];
+                text_to_show = text_to_show + " " + buf.str();
+            }
+
+            sf::Text text_LRN(L"Обратный проход (lrn):" + text_to_show, font);
+            text_LRN.setCharacterSize(font_size);
+            text_LRN.setPosition({ 0, 60 });
+            text_LRN.setOutlineThickness(1);
+            text_LRN.setOutlineColor(Color::Black);
+            vect.clear();
+
+            // отрисовка виджетов
+            window.draw(text_NLR);
+            window.draw(text_LNR);
+            window.draw(text_LRN);
+            window.display();
+        }
+    }
+}
+
+//  прямой проход (NLR)
+void Tree::NLR(std::vector<double>* vect)
+{
+    if (this == nullptr)
+    {
+        return;
+    }
+    vect->push_back(this->data);
+
+    if (this->left != nullptr)
+    {
+        this->left->NLR(vect);
     }
 
-    if (node->getRight() != nullptr)
+    if (this->right != nullptr)
     {
-        drawTree(window, node->getRight(), x + shift_x * level * 1.5, y + shift_y, level - 1);
+        this->right->NLR(vect);
     }
+}
+
+// симметричный проход (LNR)
+void Tree::LNR(std::vector<double>* vect)
+{
+    if (this == nullptr)
+    {
+        return;
+    }
+
+    if (this->left != nullptr)
+    {
+        this->left->LNR(vect);
+    }
+    vect->push_back(this->data);
+
+    if (this->right != nullptr)
+    {
+        this->right->LNR(vect);
+    }
+    
+}
+
+// обратный проход (LRN)
+void Tree::LRN(std::vector<double>* vect)
+{
+    if (this == nullptr)
+    {
+        return;
+    }
+
+    if (this->left != nullptr)
+    {
+        this->left->LRN(vect);
+    }
+
+    if (this->right != nullptr)
+    {
+        this->right->LRN(vect);
+    }
+    vect->push_back(this->data);
 }

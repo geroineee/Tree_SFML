@@ -2,6 +2,8 @@
 #include "button.h" 
 #include <iostream>
 
+#define TREE_SIZE 15
+
 std::vector<double> tree_rand(int size);
 
 /*
@@ -33,8 +35,7 @@ int main()
         }
 
         window.clear(sf::Color::White);
-        drawTree(window, tree, 400, 50, 5); // отрисовка дерева
-        
+
         window.display();
     }
     return 0;
@@ -52,11 +53,11 @@ int main()
     settings.antialiasingLevel = 8;
 
     // Создание и инициализация дерева
-    std::vector<double> values = tree_rand(10);
+    std::vector<double> values = tree_rand(TREE_SIZE);
     Tree* tree = new Tree(values);
 
     // Создание окна SFML
-    sf::RenderWindow window(sf::VideoMode(1000, 600), "Tree Visualization");
+    sf::RenderWindow window(sf::VideoMode(540, 320), L"Меню");
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
@@ -78,7 +79,8 @@ int main()
 
     RectButton button_delete_node({ 400, 40 }, { 70, 250 });
     button_delete_node.setButtonFont(font);
-    button_delete_node.setButtonLable(L"Добавить узел", sf::Color::White, 30);
+    button_delete_node.setButtonLable(L"Удалить узел", sf::Color::White, 30);
+
 
     while (window.isOpen())
     {
@@ -101,6 +103,14 @@ int main()
                     if (button_vertical_print.isPressed)
                     {
                         tree->draw(L"Вертикальная печать");
+                    }
+                    if (button_horizontal_print.isPressed)
+                    {
+                        tree->draw(L"Горизонтальная печать", true);
+                    }
+                    if (button_tree_traversal.isPressed)
+                    {
+                        tree->showTraversals();
                     }
                 }
             }
