@@ -72,6 +72,14 @@ int main()
     button_tree_traversal.setButtonFont(font);
     button_tree_traversal.setButtonLable(L"Обходы дерева", sf::Color::White, 30);
 
+    RectButton button_add_node({ 400, 40 }, { 70, 200 });
+    button_add_node.setButtonFont(font);
+    button_add_node.setButtonLable(L"Добавить узел", sf::Color::White, 30);
+
+    RectButton button_delete_node({ 400, 40 }, { 70, 250 });
+    button_delete_node.setButtonFont(font);
+    button_delete_node.setButtonLable(L"Добавить узел", sf::Color::White, 30);
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -79,6 +87,8 @@ int main()
         button_vertical_print.getButtonStatus(window, event);
         button_horizontal_print.getButtonStatus(window, event);
         button_tree_traversal.getButtonStatus(window, event);
+        button_add_node.getButtonStatus(window, event);
+        button_delete_node.getButtonStatus(window, event);
 
         while (window.pollEvent(event))
         {
@@ -96,9 +106,13 @@ int main()
             }
         }
         window.clear(sf::Color::White);
+
         button_vertical_print.draw(window);
         button_horizontal_print.draw(window);
         button_tree_traversal.draw(window);
+        button_add_node.draw(window);
+        button_delete_node.draw(window);
+
         window.display();
     }
     return 0;

@@ -50,7 +50,7 @@ public:
 
     int find_height();
     int find_left_lenght(int level);
-    int find_right_lenght();
+    int find_right_lenght(int level);
 
     // вставка значения в дерево
     void insert(double value);

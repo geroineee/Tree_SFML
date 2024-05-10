@@ -1,4 +1,5 @@
 #include "tree.h"
+#include "button.h"
 #include <cmath>
 #include <stdlib.h>
 #include <iomanip>
@@ -60,9 +61,22 @@ int Tree::find_left_lenght(int level)
     return std::max(lenght_left, lenght_right);
 }
 
-int Tree::find_right_lenght()
+int Tree::find_right_lenght(int level)
 {
-    return 0;
+    int lenght_right = 0, lenght_left = lenght_right;
+    if (this == nullptr)
+        return 0;
+    if (this->left != nullptr)
+    {
+        lenght_left -= shift_x * level * 1.5;
+        lenght_left += this->left->find_right_lenght(level - 1);
+    }
+    if (this->right != nullptr)
+    {
+        lenght_right += shift_x * level * 1.5;
+        lenght_right += this->right->find_right_lenght(level - 1);
+    }
+    return std::max(lenght_left, lenght_right);
 }
 
 void Tree::insert(double value)
@@ -96,17 +110,27 @@ void Tree::insert(double value)
 void Tree::draw(const std::wstring title)
 {
     int height = this->find_height();
-    int height_left = this->left->find_height();
-    int height_right = this->right->find_height();
-    int test = this->find_left_lenght(height);
+    int lenght_left = this->find_left_lenght(height);
+    int lenght_right = this->find_right_lenght(height);
+    float window_width = 100 + lenght_left + lenght_right;
+    float window_height = 150 + this->node_radius * 2 + shift_y * (height - 1);
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), title);
+    sf::RenderWindow window(sf::VideoMode(window_width, window_height), title);
     window.setActive(true);
     window.setVerticalSyncEnabled(true);
+
+    sf::Font font;
+    font.loadFromFile("gta.ttf");
+
+    RectButton button_back({150, 40}, {window_width/2 - 75, window_height - 70});
+    button_back.setButtonFont(font);
+    button_back.setButtonLable(L"Ќазад", sf::Color::White, 30);
 
     while (window.isOpen())
     {
         sf::Event event;
+
+        button_back.getButtonStatus(window, event);
 
         while (window.pollEvent(event))
         {
@@ -114,10 +138,21 @@ void Tree::draw(const std::wstring title)
             {
                 window.close();
             }
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (event.key.code == Mouse::Left)
+                {
+                    if (button_back.isPressed == true)
+                    {
+                        window.close();
+                    }
+                }
+            }
         }
 
         window.clear(sf::Color::White);
-        drawTree(window, this, 400, 50, height); // отрисовка дерева
+        button_back.draw(window);
+        drawTree(window, this, 50+lenght_left, 50, height); // отрисовка дерева
 
         window.display();
     }
