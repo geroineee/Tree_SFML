@@ -44,20 +44,20 @@ int Tree::find_height()
 
 int Tree::find_left_lenght(int level)
 {
-    int lenght_left = 0, lenght_right = 0;
+    int lenght_left = 0, lenght_right = lenght_left;
     if (this == nullptr)
         return 0;
     if (this->left != nullptr)
     {
         lenght_left += shift_x * level * 1.5;
-        this->left->find_left_lenght(level - 1);
+        lenght_left += this->left->find_left_lenght(level - 1);
     }
     if (this->right != nullptr)
     {
-        lenght_left -= shift_x * level * 1.5;
-        this->right->find_left_lenght(level - 1);
+        lenght_right -= shift_x * level * 1.5;
+        lenght_right += this->right->find_left_lenght(level - 1);
     }
-    return lenght_left;
+    return std::max(lenght_left, lenght_right);
 }
 
 int Tree::find_right_lenght()
