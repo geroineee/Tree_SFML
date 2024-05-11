@@ -5,11 +5,10 @@
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
-
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 
-#include <functional>
 
 using namespace sf;
 
@@ -25,6 +24,7 @@ private:
     Tree* left;
     Tree* right;
     Tree* parent;
+    int height = 1;
     double data;
 
     Vector2f position;
@@ -32,9 +32,11 @@ private:
 public:
     Tree();
     Tree(double value);
+    ~Tree();
 
     // конструктор создания дерева из элементов вектора
     Tree(const std::vector<double>& values);
+
 
     // геттеры и сеттеры приватных полей
     void setFontSize(int font_size) { this->font_size = font_size; }
@@ -82,6 +84,15 @@ public:
 
     // нахождение количества узлов дерева
     int getNodesCnt();
+
+    // балансировка дерева
+    void balanced_tree();
+    int getBalanceFactor();
+    void rotateLeft();
+    void rotateRight();
+    void updateHeight();
+
+    void delete_tree();
 
     // отрисовка дерева
     void draw(const std::wstring title, bool isHorosontal = false);

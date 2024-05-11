@@ -12,6 +12,11 @@ Tree::Tree(double value)
     data = value;
 }
 
+Tree::~Tree()
+{
+    this->delete_tree();
+}
+
 Tree::Tree(const std::vector<double>& values)
 {
     if (values.empty()) { return; }
@@ -33,10 +38,16 @@ int Tree::find_height()
     if (this == nullptr)
         return 0;
     if (this->left != nullptr)
+    {
         height_left = this->left->find_height();
+        //this->height = height_left + 1;
+    }
     if (this->right != nullptr)
+    {
         height_right = this->right->find_height();
-    return std::max(height_right, height_left)+1;
+        //this->height = height_right + 1;
+    }
+    return std::max(height_right, height_left) + 1;
 }
 
 int Tree::find_left_lenght(int level)
@@ -105,19 +116,19 @@ void Tree::insert(double value)
 
 void Tree::draw(const std::wstring title, bool isHorisontal)
 {
-    int height = this->find_height();
-    int lenght_left = this->find_left_lenght(height);
-    int lenght_right = this->find_right_lenght(height);
+    int height_tree = this->find_height();
+    int lenght_left = this->find_left_lenght(height_tree);
+    int lenght_right = this->find_right_lenght(height_tree);
     float window_width, window_height;
 
     if (!isHorisontal)
     {
         window_width = 100 + lenght_left + lenght_right;
-        window_height = 150 + this->node_radius * 2 + shift_y * (height - 1);
+        window_height = 150 + this->node_radius * 2 + shift_y * (height_tree - 1);
     }
     else
     {
-        window_width = 100 + this->node_radius * 2 + shift_y * (height - 1);
+        window_width = 100 + this->node_radius * 2 + shift_y * (height_tree - 1);
         window_height = 150 + lenght_left + lenght_right;
     }
 
@@ -160,9 +171,9 @@ void Tree::draw(const std::wstring title, bool isHorisontal)
 
         // отрисовка дерева
         if (!isHorisontal)
-            drawTree(window, this, 50 + lenght_left, 50, height, isHorisontal);
+            drawTree(window, this, 50 + lenght_left, 50, height_tree, isHorisontal);
         else
-            drawTree(window, this, 50, 50 + lenght_right, height, isHorisontal);
+            drawTree(window, this, 50, 50 + lenght_right, height_tree, isHorisontal);
 
         window.display();
     }
@@ -247,7 +258,7 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
             pos_parent.x += radius;
             pos_node.x -= radius;
         }
-        drawLine(window, node->getNodeRadius(), pos_parent, pos_node);
+        //drawLine(window, node->getNodeRadius(), pos_parent, pos_node);
     }
     window.draw(circle);
     window.draw(text);
@@ -279,7 +290,6 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
         }
     }
 }
-
 
 void Tree::showTraversals()
 {
@@ -469,4 +479,107 @@ int Tree::getNodesCnt()
         cnt += 1 + this->right->getNodesCnt();
     }
     return cnt;
+}
+
+void Tree::balanced_tree()
+{
+    if (this == nullptr) return;
+    this->updateHeight();
+    int balanceFactor = this->getBalanceFactor();
+    if (balanceFactor > 1)
+    {
+        if (this->left->getBalanceFactor() < 0)
+        {
+            this->left->rotateLeft();
+        }
+        this->rotateRight();
+    }
+    else if (balanceFactor < -1)
+    {
+        if (this->right->getBalanceFactor() > 0)
+        {
+            this->right->rotateRight();
+        }
+        this->rotateLeft();
+    }
+    else
+    {
+        return;
+    }
+    this->balanced_tree();
+}
+
+int Tree::getBalanceFactor()
+{
+    if (this == nullptr) return 0;
+    return this->left->find_height() - this->right->find_height();
+}
+
+void Tree::delete_tree()
+{
+    if (this == nullptr)
+    {
+        return;
+    }
+
+    if (this->left != nullptr)
+    {
+        this->left->delete_tree();
+    }
+
+    if (this->right != nullptr)
+    {
+        this->right->delete_tree();
+    }
+    delete this;
+}
+
+void Tree::rotateLeft()
+{
+    Tree* newRoot = this->right;
+    this->right = newRoot->left;
+    if (newRoot->left != nullptr)
+        newRoot->left->parent = this;
+    newRoot->left = this;
+    newRoot->parent = this->parent;
+    if (this->parent != nullptr)
+    {
+        if (this->parent->left == this)
+            this->parent->left = newRoot;
+        else
+            this->parent->right = newRoot;
+    }
+    this->parent = newRoot;
+    this->updateHeight();
+    newRoot->updateHeight();
+    *this = *newRoot;
+}
+
+void Tree::rotateRight()
+{
+    Tree* newRoot = this->left;
+    this->left = newRoot->right;
+    if (newRoot->right != nullptr)
+        newRoot->right->parent = this;
+    newRoot->right = this;
+    newRoot->parent = this->parent;
+    if (this->parent != nullptr)
+    {
+        if (this->parent->left == this)
+            this->parent->left = newRoot;
+        else
+            this->parent->right = newRoot;
+    }
+    this->parent = newRoot;
+    this->updateHeight();
+    newRoot->updateHeight();
+    *this = *newRoot;
+}
+
+void Tree::updateHeight()
+{
+    if (this != nullptr)
+    {
+        this->height = 1 + std::max(this->left->find_height(), this->right->find_height());
+    }
 }

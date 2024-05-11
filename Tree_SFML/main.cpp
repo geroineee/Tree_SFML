@@ -2,7 +2,7 @@
 #include "button.h" 
 #include <iostream>
 
-#define TREE_SIZE 7
+#define TREE_SIZE 4
 
 std::vector<double> tree_rand(int size);
 
@@ -57,7 +57,7 @@ int main()
     Tree* tree = new Tree(values);
 
     // Создание окна SFML
-    sf::RenderWindow window(sf::VideoMode(540, 320), L"Меню");
+    sf::RenderWindow window(sf::VideoMode(540, 600), L"Меню");
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
@@ -81,6 +81,9 @@ int main()
     button_delete_node.setButtonFont(font);
     button_delete_node.setButtonLable(L"Удалить узел", sf::Color::White, 30);
 
+    RectButton button_balanced_tree({ 400, 40 }, { 70, 300 });
+    button_balanced_tree.setButtonFont(font);
+    button_balanced_tree.setButtonLable(L"Сбалансировать дерево", sf::Color::White, 30);
 
     while (window.isOpen())
     {
@@ -91,6 +94,7 @@ int main()
         button_tree_traversal.getButtonStatus(window, event);
         button_add_node.getButtonStatus(window, event);
         button_delete_node.getButtonStatus(window, event);
+        button_balanced_tree.getButtonStatus(window, event);
 
         while (window.pollEvent(event))
         {
@@ -112,6 +116,11 @@ int main()
                     {
                         tree->showTraversals();
                     }
+                    if (button_balanced_tree.isPressed)
+                    {
+                        tree->balanced_tree();
+                        tree->draw(L"Найс баланс");
+                    }
                 }
             }
         }
@@ -122,6 +131,7 @@ int main()
         button_tree_traversal.draw(window);
         button_add_node.draw(window);
         button_delete_node.draw(window);
+        button_balanced_tree.draw(window);
 
         window.display();
     }
