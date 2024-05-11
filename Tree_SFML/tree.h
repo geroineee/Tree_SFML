@@ -90,10 +90,7 @@ public:
     // обратный обход (LRN)
     void LRN(std::vector<double>* vect);
 
-    // нахождение количества узлов дерева
-    int getNodesCnt();
-
-    //
+    // удаление дерева
     void delete_tree();
 
     // отрисовка дерева
@@ -166,13 +163,13 @@ public:
 
 };
 
+void MessageBox(std::wstring message);
+
 // Отрисовка дерева
 void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level, bool isHorisontal);
 
-
 // сбалансированнное добавлние элемента 
 Tree* insertNode(Tree* root, double data);
-
 
 // окно добавления
 std::string getDataWindow(std::wstring mes);

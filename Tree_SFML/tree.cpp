@@ -240,7 +240,7 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
     node->setPosition({ x, y });
 
     // Отображение узла как окружности
-    sf::CircleShape circle(radius);
+    sf::CircleShape circle(radius, 30);
     circle.setPosition(position);
     circle.setFillColor(sf::Color::Yellow);
     circle.setOutlineThickness(2);
@@ -311,18 +311,27 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
 
 void Tree::showTraversals()
 {
-
     // Установления шрифта
     sf::Font font;
     font.loadFromFile("gta.ttf");
     int font_size = 30;
 
     float window_width, window_height = 330;
-    int count_node = (getNodesCnt()+1) * 3;
-    if (count_node < 25)
+    
+    int count_symb = 0;
+    std::vector<double> values;
+    this->NLR(&values);
+    for (int i = 0; i < values.size(); i++)
+    {
+        std::ostringstream str;
+        str << std::fixed << std::setprecision(1) << values[i];
+        count_symb += str.str().size();
+    }
+
+    if (count_symb < 25)
         window_width = font_size / 2.5 * 25;
     else
-        window_width = font_size / 2.5 * count_node;
+        window_width = font_size / 2.5 * count_symb;
 
     // Создание окна
     sf::RenderWindow window(sf::VideoMode(window_width + 100, window_height), L"Обходы дерева");
@@ -487,27 +496,6 @@ void Tree::LRN(std::vector<double>* vect)
     vect->push_back(this->data);
 }
 
-int Tree::getNodesCnt()
-{
-    int cnt = 0;
-
-    if (this == nullptr)
-    {
-        return 0;
-    }
-
-    if (this->left != nullptr)
-    {
-        cnt += 1 + this->left->getNodesCnt();
-    }
-
-    if (this->right != nullptr)
-    {
-        cnt += 1 + this->right->getNodesCnt();
-    }
-    return cnt;
-}
-
 int getBalanceFactor(Tree* node)
 {
     if (node == nullptr) return 0;
@@ -622,6 +610,7 @@ std::string getDataWindow(std::wstring text_message)
 
     sdx::TextBox textBox(440, 32, 50, 100, 2);
     //textBox.setPosition(0, 100);
+    std::string text_to_return = "";
 
     while (window.isOpen())
     {
@@ -648,6 +637,7 @@ std::string getDataWindow(std::wstring text_message)
                     }
                     if (button_accept.isPressed)
                     {
+                        text_to_return = textBox.getCurrentText(); // получение текста из TextBox
                         window.close();
                     }
                 }
@@ -663,7 +653,7 @@ std::string getDataWindow(std::wstring text_message)
 
         window.display();
     }
-    return textBox.getCurrentText(); // получение текста из TextBox
+    return text_to_return;
 }
 
 
@@ -688,21 +678,84 @@ void Tree::delNode()
         if (deleted_node != nullptr)
         {
             Tree* temp = deleted_node->getParent();
-            if (temp->left == deleted_node)
+            if (temp != nullptr)
             {
-                temp->left = nullptr;
-            }
-            else
-            {
-                temp->right = nullptr;
+                if (temp->left == deleted_node)
+                {
+                    temp->left = nullptr;
+                }
+                else
+                {
+                    temp->right = nullptr;
+                }
             }
             deleted_node->delete_tree();
         }
         else
         {
-            getDataWindow(L"Элемент не найден");
+            MessageBox(L"Элемент не найден");
         }
     }
+}
+
+void MessageBox(std::wstring message)
+{
+    Font font;
+    font.loadFromFile("gta.ttf");
+
+    Text text_msg(message, font, 30);
+    text_msg.setFillColor(Color::White);
+    text_msg.setOutlineColor(Color::Black);
+    text_msg.setOutlineThickness(1);
+
+    float text_size = text_msg.getCharacterSize() / 2.5 * message.size();
+    float window_width = 100 + text_size;
+    float window_height = 100 + 40 + 30 + 30; // Отступы (сверху и снизу) + высота кнопки + высота текста + отступ между текстом и кнопкой
+
+    RenderWindow window(VideoMode(window_width, window_height), L"Уведомление");
+
+    text_msg.setPosition(window_width/2 - text_size/2, 50);
+
+    // Установление иконки
+    sf::Image icon;
+    icon.loadFromFile("tree_icon.png");
+    window.setIcon(512, 512, icon.getPixelsPtr());
+
+    RectButton button_OK({150, 40}, {window_width/2 - 75, window_height - 40 - 50});
+    button_OK.setButtonFont(font);
+    button_OK.setButtonLable(L"OK", sf::Color::White, 30);
+
+    while (window.isOpen())
+    {
+        sf::Event event;
+
+        button_OK.getButtonStatus(window, event);
+
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+            }
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (event.key.code == Mouse::Left)
+                {
+                    if (button_OK.isPressed)
+                    {
+                        window.close();
+                    }
+                }
+            }
+        }
+        window.clear(Color::White);
+
+        button_OK.draw(window);
+        window.draw(text_msg);
+
+        window.display();
+    }
+
 }
 
 // нахождение элемента по значению key в поле data
