@@ -36,8 +36,7 @@ public:
 
     // конструктор создания дерева из элементов вектора
     Tree(const std::vector<double>& values);
-
-
+    
     // геттеры и сеттеры приватных полей
     void setFontSize(int font_size) { this->font_size = font_size; }
     void setShiftX(float shift_x) { this->shift_x = shift_x; }
@@ -48,11 +47,17 @@ public:
     float getShiftX() { return this->shift_x; }
     float getShiftY() { return this->shift_y; }
     int getNodeRadius() { return this->node_radius; }
+    int getHeight()
+    {
+        if (this == nullptr) return 0;
+        return this->height;
+    }
 
     void setLeft(Tree* left) { this->left = left; }
     void setRight(Tree* right) { this->right = right; }
     void setParent(Tree* parent) { this->parent = parent; }
     void setData(double data) { this->data = data; }
+    void setHeight(int height) { this->height = height; }
 
     Tree* getLeft() { return this->left; }
     Tree* getRight() { return this->right; }
@@ -85,18 +90,68 @@ public:
     // нахождение количества узлов дерева
     int getNodesCnt();
 
-    // балансировка дерева
-    void balanced_tree();
-    int getBalanceFactor();
-    void rotateLeft();
-    void rotateRight();
-    void updateHeight();
-
+    //
     void delete_tree();
 
     // отрисовка дерева
     void draw(const std::wstring title, bool isHorosontal = false);
+
+    int getBalance() {
+        int leftHeight = (left ? left->height : 0);
+        int rightHeight = (right ? right->height : 0);
+        return leftHeight - rightHeight;
+    }
+
+    void updateHeight() {
+        int leftHeight = (left ? left->height : 0);
+        int rightHeight = (right ? right->height : 0);
+        height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+    }
+
+    Tree* rotateLeft() {
+        Tree* newRoot = right;
+        right = newRoot->left;
+        newRoot->left = this;
+        parent = newRoot;
+        updateHeight();
+        newRoot->updateHeight();
+        return newRoot;
+    }
+
+    Tree* rotateRight() {
+        Tree* newRoot = left;
+        left = newRoot->right;
+        newRoot->right = this;
+        parent = newRoot;
+        updateHeight();
+        newRoot->updateHeight();
+        return newRoot;
+    }
+
+    Tree* balance()
+    {
+        int balanceFactor = getBalance();
+        if (balanceFactor > 1) {
+            if (left && left->getBalance() < 0) {
+                left = left->rotateLeft();
+            }
+            return rotateRight();
+        }
+        if (balanceFactor < -1) {
+            if (right && right->getBalance() > 0) {
+                right = right->rotateRight();
+            }
+            return rotateLeft();
+        }
+        return this;
+    }
+
+
 };
 
 // Отрисовка дерева
 void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level, bool isHorisontal);
+
+
+// сбалансированнное добавлние элемента 
+Tree* insertNode(Tree* root, double data);

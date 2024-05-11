@@ -53,7 +53,8 @@ int main()
     settings.antialiasingLevel = 8;
 
     // Создание и инициализация дерева
-    std::vector<double> values = tree_rand(TREE_SIZE);
+    //std::vector<double> values = tree_rand(TREE_SIZE);
+    std::vector<double> values = { 20, 10, 30, 80, 40, 60, 50, 70 };
     Tree* tree = new Tree(values);
 
     // Создание окна SFML
@@ -118,8 +119,12 @@ int main()
                     }
                     if (button_balanced_tree.isPressed)
                     {
-                        tree->balanced_tree();
-                        tree->draw(L"Найс баланс");
+                        Tree* new_tree = new Tree;
+                        for (size_t i = 0; i < values.size(); i++)
+                        {
+                            new_tree = insertNode(new_tree, values[i]);
+                        }
+                        new_tree->draw(L"Найс баланс");
                     }
                 }
             }

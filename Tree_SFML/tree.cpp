@@ -14,7 +14,7 @@ Tree::Tree(double value)
 
 Tree::~Tree()
 {
-    this->delete_tree();
+    //this->delete_tree();
 }
 
 Tree::Tree(const std::vector<double>& values)
@@ -32,6 +32,25 @@ Tree::Tree(const std::vector<double>& values)
     }
 }
 
+void Tree::delete_tree()
+{
+    if (this == nullptr)
+    {
+        return;
+    }
+
+    if (this->left != nullptr)
+    {
+        this->left->delete_tree();
+    }
+
+    if (this->right != nullptr)
+    {
+        this->right->delete_tree();
+    }
+    delete this;
+}
+
 int Tree::find_height()
 {
     int height_left = 0, height_right = 0;
@@ -40,12 +59,10 @@ int Tree::find_height()
     if (this->left != nullptr)
     {
         height_left = this->left->find_height();
-        //this->height = height_left + 1;
     }
     if (this->right != nullptr)
     {
         height_right = this->right->find_height();
-        //this->height = height_right + 1;
     }
     return std::max(height_right, height_left) + 1;
 }
@@ -258,7 +275,7 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
             pos_parent.x += radius;
             pos_node.x -= radius;
         }
-        //drawLine(window, node->getNodeRadius(), pos_parent, pos_node);
+        drawLine(window, node->getNodeRadius(), pos_parent, pos_node);
     }
     window.draw(circle);
     window.draw(text);
@@ -481,105 +498,86 @@ int Tree::getNodesCnt()
     return cnt;
 }
 
-void Tree::balanced_tree()
+int getBalanceFactor(Tree* node)
 {
-    if (this == nullptr) return;
-    this->updateHeight();
-    int balanceFactor = this->getBalanceFactor();
-    if (balanceFactor > 1)
+    if (node == nullptr) return 0;
+    return node->getLeft()->getHeight() - node->getRight()->getHeight();
+}
+
+void updateHeight(Tree* node)
+{
+    if (node != nullptr)
     {
-        if (this->left->getBalanceFactor() < 0)
-        {
-            this->left->rotateLeft();
+        node->setHeight(1 + std::max(node->getLeft()->find_height(), node->getRight()->find_height()));
+    }
+}
+
+Tree* rotateRight(Tree* node)
+{
+    Tree* newRoot = node->getLeft();
+    node->setLeft(newRoot->getRight());
+    newRoot->setRight(node);
+    newRoot->setParent(node->getParent());
+    node->setParent(newRoot);
+    if (node->getLeft() != nullptr)
+        node->getLeft()->setParent(node);
+    updateHeight(node);
+    updateHeight(newRoot);
+    return newRoot;
+}
+
+Tree* rotateLeft(Tree* node)
+{
+    Tree* newRoot = node->getRight();
+    node->setRight(newRoot->getLeft());
+    newRoot->setLeft(node);
+    newRoot->setParent(node->getParent());
+    node->setParent(newRoot);
+    if (node->getRight() != nullptr)
+        node->getRight()->setParent(node);
+    updateHeight(node);
+    updateHeight(newRoot);
+    return newRoot;
+}
+
+Tree* balanceTree(Tree* node)
+{
+    if (node == nullptr) return nullptr;
+    updateHeight(node);
+    int balanceFactor = getBalanceFactor(node);
+    if (balanceFactor > 1) {
+        if (getBalanceFactor(node->getLeft()) < 0) {
+            node->setLeft(rotateLeft(node->getLeft()));
         }
-        this->rotateRight();
+        return rotateRight(node);
     }
     else if (balanceFactor < -1)
     {
-        if (this->right->getBalanceFactor() > 0)
+        if (getBalanceFactor(node->getRight()) > 0)
         {
-            this->right->rotateRight();
+            node->setRight(rotateRight(node->getRight()));
         }
-        this->rotateLeft();
+        return rotateLeft(node);
     }
-    else
-    {
-        return;
-    }
-    this->balanced_tree();
+    return node;
 }
 
-int Tree::getBalanceFactor()
+Tree* insertNode(Tree* root, double data)
 {
-    if (this == nullptr) return 0;
-    return this->left->find_height() - this->right->find_height();
-}
-
-void Tree::delete_tree()
-{
-    if (this == nullptr)
+    if (root == nullptr) return new Tree(data);
+    if (data < root->getData())
     {
-        return;
+        root->setLeft(insertNode(root->getLeft(), data));
+        root->getLeft()->setParent(root);
     }
-
-    if (this->left != nullptr)
+    else if (data > root->getData())
     {
-        this->left->delete_tree();
+        root->setRight(insertNode(root->getRight(), data));
+        root->getRight()->setParent(root);
     }
-
-    if (this->right != nullptr)
-    {
-        this->right->delete_tree();
+    else {
+        // Duplicate values are not allowed in this example
+        return root;
     }
-    delete this;
-}
-
-void Tree::rotateLeft()
-{
-    Tree* newRoot = this->right;
-    this->right = newRoot->left;
-    if (newRoot->left != nullptr)
-        newRoot->left->parent = this;
-    newRoot->left = this;
-    newRoot->parent = this->parent;
-    if (this->parent != nullptr)
-    {
-        if (this->parent->left == this)
-            this->parent->left = newRoot;
-        else
-            this->parent->right = newRoot;
-    }
-    this->parent = newRoot;
-    this->updateHeight();
-    newRoot->updateHeight();
-    *this = *newRoot;
-}
-
-void Tree::rotateRight()
-{
-    Tree* newRoot = this->left;
-    this->left = newRoot->right;
-    if (newRoot->right != nullptr)
-        newRoot->right->parent = this;
-    newRoot->right = this;
-    newRoot->parent = this->parent;
-    if (this->parent != nullptr)
-    {
-        if (this->parent->left == this)
-            this->parent->left = newRoot;
-        else
-            this->parent->right = newRoot;
-    }
-    this->parent = newRoot;
-    this->updateHeight();
-    newRoot->updateHeight();
-    *this = *newRoot;
-}
-
-void Tree::updateHeight()
-{
-    if (this != nullptr)
-    {
-        this->height = 1 + std::max(this->left->find_height(), this->right->find_height());
-    }
+    return balanceTree(root);
 }
