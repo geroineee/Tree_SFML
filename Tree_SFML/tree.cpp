@@ -12,10 +12,7 @@ Tree::Tree(double value)
     data = value;
 }
 
-Tree::~Tree()
-{
-    this->delete_tree();
-}
+Tree::~Tree() {}
 
 Tree::Tree(const std::vector<double>& values)
 {
@@ -34,20 +31,17 @@ Tree::Tree(const std::vector<double>& values)
 
 void Tree::delete_tree()
 {
-    if (this == nullptr)
+    if (this == nullptr) 
     {
         return;
     }
+    // –екурсивно удал€ем левое поддерево
+    this->left->delete_tree();
 
-    if (this->left != nullptr)
-    {
-        this->left->delete_tree();
-    }
+    // –екурсивно удал€ем правое поддерево
+    this->right->delete_tree();
 
-    if (this->right != nullptr)
-    {
-        this->right->delete_tree();
-    }
+    // ”дал€ем текущий узел
     delete this;
 }
 
@@ -680,5 +674,54 @@ void Tree::addNode()
     {
         double newData = std::stod(user_data);
         this->insert(newData);
+    }
+}
+
+void Tree::delNode()
+{
+    std::string user_data = getDataWindow(L"”даление узла");
+    if (user_data.size() != 0)
+    {
+        double delData = std::stod(user_data);
+        // нахождение указател€ на элемент
+        Tree* deleted_node = this->find(delData);
+        if (deleted_node != nullptr)
+        {
+            Tree* temp = deleted_node->getParent();
+            if (temp->left == deleted_node)
+            {
+                temp->left = nullptr;
+            }
+            else
+            {
+                temp->right = nullptr;
+            }
+            deleted_node->delete_tree();
+        }
+        else
+        {
+            getDataWindow(L"Ёлемент не найден");
+        }
+    }
+}
+
+// нахождение элемента по значению key в поле data
+Tree* Tree::find(double key)
+{
+    if (data == key)
+    {
+        return this;
+    }
+    else if (key < data && left != nullptr)
+    {
+        return left->find(key);
+    }
+    else if (key > data && right != nullptr) 
+    {
+        return right->find(key);
+    }
+    else
+    {
+        return nullptr;
     }
 }

@@ -156,8 +156,13 @@ public:
         }
         return this;
     }
-
+    
     void addNode();
+
+    void delNode();
+
+    // нахождение элемента по значению
+    Tree* find(double key);
 
 };
 

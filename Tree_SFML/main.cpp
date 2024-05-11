@@ -137,6 +137,10 @@ int main()
                     {
                         tree->addNode();
                     }
+                    if (button_delete_node.isPressed)
+                    {
+                        tree->delNode();
+                    }
                 }
             }
         }
