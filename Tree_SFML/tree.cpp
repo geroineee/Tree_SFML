@@ -14,7 +14,7 @@ Tree::Tree(double value)
 
 Tree::~Tree()
 {
-    //this->delete_tree();
+    this->delete_tree();
 }
 
 Tree::Tree(const std::vector<double>& values)

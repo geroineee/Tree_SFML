@@ -2,7 +2,7 @@
 #include "button.h" 
 #include <iostream>
 
-#define TREE_SIZE 4
+#define TREE_SIZE 7
 
 std::vector<double> tree_rand(int size);
 
@@ -53,8 +53,7 @@ int main()
     settings.antialiasingLevel = 8;
 
     // Создание и инициализация дерева
-    //std::vector<double> values = tree_rand(TREE_SIZE);
-    std::vector<double> values = { 20, 10, 30, 80, 40, 60, 50, 70 };
+    std::vector<double> values = tree_rand(TREE_SIZE);
     Tree* tree = new Tree(values);
 
     // Создание окна SFML
@@ -119,8 +118,8 @@ int main()
                     }
                     if (button_balanced_tree.isPressed)
                     {
-                        Tree* new_tree = new Tree;
-                        for (size_t i = 0; i < values.size(); i++)
+                        Tree* new_tree = new Tree(values[0]);
+                        for (size_t i = 1; i < values.size(); i++)
                         {
                             new_tree = insertNode(new_tree, values[i]);
                         }
