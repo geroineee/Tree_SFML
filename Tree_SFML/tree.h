@@ -99,19 +99,22 @@ public:
     // отрисовка дерева
     void draw(const std::wstring title, bool isHorosontal = false);
 
-    int getBalance() {
+    int getBalance() 
+    {
         int leftHeight = (left ? left->height : 0);
         int rightHeight = (right ? right->height : 0);
         return leftHeight - rightHeight;
     }
 
-    void updateHeight() {
+    void updateHeight() 
+    {
         int leftHeight = (left ? left->height : 0);
         int rightHeight = (right ? right->height : 0);
         height = (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
     }
 
-    Tree* rotateLeft() {
+    Tree* rotateLeft() 
+    {
         Tree* newRoot = right;
         right = newRoot->left;
         newRoot->left = this;
@@ -121,7 +124,8 @@ public:
         return newRoot;
     }
 
-    Tree* rotateRight() {
+    Tree* rotateRight() 
+    {
         Tree* newRoot = left;
         left = newRoot->right;
         newRoot->right = this;
@@ -134,14 +138,18 @@ public:
     Tree* balance()
     {
         int balanceFactor = getBalance();
-        if (balanceFactor > 1) {
-            if (left && left->getBalance() < 0) {
+        if (balanceFactor > 1) 
+        {
+            if (left && left->getBalance() < 0) 
+            {
                 left = left->rotateLeft();
             }
             return rotateRight();
         }
-        if (balanceFactor < -1) {
-            if (right && right->getBalance() > 0) {
+        if (balanceFactor < -1) 
+        {
+            if (right && right->getBalance() > 0) 
+            {
                 right = right->rotateRight();
             }
             return rotateLeft();

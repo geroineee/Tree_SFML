@@ -561,8 +561,10 @@ Tree* balanceTree(Tree* node)
     if (node == nullptr) return nullptr;
     updateHeight(node);
     int balanceFactor = getBalanceFactor(node);
-    if (balanceFactor > 1) {
-        if (getBalanceFactor(node->getLeft()) < 0) {
+    if (balanceFactor > 1) 
+    {
+        if (getBalanceFactor(node->getLeft()) < 0) 
+        {
             node->setLeft(rotateLeft(node->getLeft()));
         }
         return rotateRight(node);
@@ -586,21 +588,18 @@ Tree* insertNode(Tree* root, double data)
         root->setLeft(insertNode(root->getLeft(), data));
         root->getLeft()->setParent(root);
     }
-    else if (data > root->getData())
+    else if (data >= root->getData())
     {
         root->setRight(insertNode(root->getRight(), data));
         root->getRight()->setParent(root);
-    }
-    else {
-        // Duplicate values are not allowed in this example
-        return root;
     }
     return balanceTree(root);
 }
 
 std::string getDataWindow(std::wstring text_message)
 {
-    RenderWindow window(VideoMode(700, 350), L"Ввод данных");
+    int window_width = 540, window_height = 300;
+    RenderWindow window(VideoMode(window_width, window_height), L"Ввод данных");
 
     // Установление иконки
     sf::Image icon;
@@ -610,9 +609,13 @@ std::string getDataWindow(std::wstring text_message)
     Font font;
     font.loadFromFile("gta.ttf");
 
-    RectButton button_accept(sf::Vector2f(340, 40), sf::Vector2f(0, 0));
+    RectButton button_accept(sf::Vector2f(195, 40), sf::Vector2f(window_width-195-50, window_height-40-50));
     button_accept.setButtonFont(font);
     button_accept.setButtonLable(L"Продолжить", Color::White, 30);
+
+    RectButton button_exit(sf::Vector2f(195, 40), sf::Vector2f(50, window_height - 40 - 50));
+    button_exit.setButtonFont(font);
+    button_exit.setButtonLable(L"Назад", Color::White, 30);
 
     Text text_msg;
     text_msg.setFont(font);
@@ -621,19 +624,18 @@ std::string getDataWindow(std::wstring text_message)
     text_msg.setOutlineColor(Color::Black);
     text_msg.setOutlineThickness(1);
     text_msg.setCharacterSize(30);
-    text_msg.setPosition(0, 50);
+    text_msg.setPosition(180, 50);
 
-    sdx::TextBox::Text text("", 124, 220);
-    text.setSize(20);
-    sdx::TextBox textBox(440, 32, 130, 160, 2);
-    textBox.setPosition(0, 100);
+    sdx::TextBox textBox(440, 32, 50, 100, 2);
+    //textBox.setPosition(0, 100);
 
     while (window.isOpen())
     {
-        Vector2i mousePoz = Mouse::getPosition(window);//позиция мыши в окне
+        Vector2i mousePoz = Mouse::getPosition(window); // позиция мыши в окне
         sf::Event event;
 
         button_accept.getButtonStatus(window, event);
+        button_exit.getButtonStatus(window, event);
 
         while (window.pollEvent(event))
         {
@@ -646,6 +648,10 @@ std::string getDataWindow(std::wstring text_message)
             {
                 if (event.key.code == Mouse::Left)
                 {
+                    if (button_exit.isPressed)
+                    {
+                        window.close();
+                    }
                     if (button_accept.isPressed)
                     {
                         window.close();
@@ -656,21 +662,23 @@ std::string getDataWindow(std::wstring text_message)
 
         window.clear(Color::White);
 
+        button_exit.draw(window);
         button_accept.draw(window);
         textBox.draw(window);
         window.draw(text_msg);
 
         window.display();
     }
-
-
-    return textBox.getCurrentText();//извлекаю введенный текст
+    return textBox.getCurrentText(); // получение текста из TextBox
 }
 
 
 void Tree::addNode()
 {
-    double newData = std::stod(getDataWindow(L"Добавление узла"));
-    
-    this->insert(newData);
+    std::string user_data = getDataWindow(L"Добавление узла");
+    if (user_data.size() != 0)
+    {
+        double newData = std::stod(user_data);
+        this->insert(newData);
+    }
 }
