@@ -9,6 +9,9 @@
 #include <iomanip>
 #include <sstream>
 
+#include "textbox.h"
+#include "button.h"
+
 
 using namespace sf;
 
@@ -146,6 +149,7 @@ public:
         return this;
     }
 
+    void addNode();
 
 };
 
@@ -155,3 +159,7 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
 
 // сбалансированнное добавлние элемента 
 Tree* insertNode(Tree* root, double data);
+
+
+// окно добавления
+std::string getDataWindow(std::wstring mes);

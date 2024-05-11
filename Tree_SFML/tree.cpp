@@ -149,9 +149,16 @@ void Tree::draw(const std::wstring title, bool isHorisontal)
         window_height = 150 + lenght_left + lenght_right;
     }
 
+    // Создания окна
     sf::RenderWindow window(sf::VideoMode(window_width, window_height), title);
     window.setVerticalSyncEnabled(true);
+    
+    // Установление иконки
+    sf::Image icon;
+    icon.loadFromFile("tree_icon.png");
+    window.setIcon(512, 512, icon.getPixelsPtr());
 
+    // Установления шрифта
     sf::Font font;
     font.loadFromFile("gta.ttf");
 
@@ -310,6 +317,8 @@ void drawTree(sf::RenderWindow& window, Tree* node, float x, float y, int level,
 
 void Tree::showTraversals()
 {
+
+    // Установления шрифта
     sf::Font font;
     font.loadFromFile("gta.ttf");
     int font_size = 30;
@@ -320,8 +329,15 @@ void Tree::showTraversals()
         window_width = font_size / 2.5 * 25;
     else
         window_width = font_size / 2.5 * count_node;
+
+    // Создание окна
     sf::RenderWindow window(sf::VideoMode(window_width + 100, window_height), L"Обходы дерева");
     window.setVerticalSyncEnabled(true);
+
+    // Установление иконки
+    sf::Image icon;
+    icon.loadFromFile("tree_icon.png");
+    window.setIcon(512, 512, icon.getPixelsPtr());
 
     RectButton button_back({ 150, 40 }, { window_width / 2 - 30, window_height - 70 });
     button_back.setButtonFont(font);
@@ -580,4 +596,81 @@ Tree* insertNode(Tree* root, double data)
         return root;
     }
     return balanceTree(root);
+}
+
+std::string getDataWindow(std::wstring text_message)
+{
+    RenderWindow window(VideoMode(700, 350), L"Ввод данных");
+
+    // Установление иконки
+    sf::Image icon;
+    icon.loadFromFile("tree_icon.png");
+    window.setIcon(512, 512, icon.getPixelsPtr());
+
+    Font font;
+    font.loadFromFile("gta.ttf");
+
+    RectButton button_accept(sf::Vector2f(340, 40), sf::Vector2f(0, 0));
+    button_accept.setButtonFont(font);
+    button_accept.setButtonLable(L"Продолжить", Color::White, 30);
+
+    Text text_msg;
+    text_msg.setFont(font);
+    text_msg.setString(text_message);
+    text_msg.setFillColor(Color::White);
+    text_msg.setOutlineColor(Color::Black);
+    text_msg.setOutlineThickness(1);
+    text_msg.setCharacterSize(30);
+    text_msg.setPosition(0, 50);
+
+    sdx::TextBox::Text text("", 124, 220);
+    text.setSize(20);
+    sdx::TextBox textBox(440, 32, 130, 160, 2);
+    textBox.setPosition(0, 100);
+
+    while (window.isOpen())
+    {
+        Vector2i mousePoz = Mouse::getPosition(window);//позиция мыши в окне
+        sf::Event event;
+
+        button_accept.getButtonStatus(window, event);
+
+        while (window.pollEvent(event))
+        {
+            textBox.handleEvent(event);
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+            }
+            if (event.type == Event::MouseButtonPressed)
+            {
+                if (event.key.code == Mouse::Left)
+                {
+                    if (button_accept.isPressed)
+                    {
+                        window.close();
+                    }
+                }
+            }
+        }
+
+        window.clear(Color::White);
+
+        button_accept.draw(window);
+        textBox.draw(window);
+        window.draw(text_msg);
+
+        window.display();
+    }
+
+
+    return textBox.getCurrentText();//извлекаю введенный текст
+}
+
+
+void Tree::addNode()
+{
+    double newData = std::stod(getDataWindow(L"Добавление узла"));
+    
+    this->insert(newData);
 }

@@ -27,6 +27,9 @@
     <ClCompile Include="button.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="textbox.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tree.h">
@@ -35,5 +38,13 @@
     <ClInclude Include="button.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="textbox.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="tree_icon.png">
+      <Filter>Исходные файлы</Filter>
+    </Image>
   </ItemGroup>
 </Project>

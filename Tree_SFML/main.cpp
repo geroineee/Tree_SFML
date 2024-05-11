@@ -58,6 +58,12 @@ int main()
 
     // Создание окна SFML
     sf::RenderWindow window(sf::VideoMode(540, 600), L"Меню");
+    
+    // Установление иконки
+    sf::Image icon;
+    icon.loadFromFile("tree_icon.png");
+    window.setIcon(512, 512, icon.getPixelsPtr());
+
     window.setVerticalSyncEnabled(true);
     window.setFramerateLimit(60);
 
@@ -118,12 +124,18 @@ int main()
                     }
                     if (button_balanced_tree.isPressed)
                     {
+                        values.clear();
+                        tree->LNR(&values);
                         Tree* new_tree = new Tree(values[0]);
                         for (size_t i = 1; i < values.size(); i++)
                         {
                             new_tree = insertNode(new_tree, values[i]);
                         }
-                        new_tree->draw(L"Найс баланс");
+                        new_tree->draw(L"Сбалансированное дерево");
+                    }
+                    if (button_add_node.isPressed)
+                    {
+                        tree->addNode();
                     }
                 }
             }
